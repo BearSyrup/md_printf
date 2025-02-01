@@ -14,7 +14,7 @@ void read_char(lexer *lexer) {
   lexer->read_pos += 1;
 }
 
-lexer *lexer_init(const char *input) {
+lexer *new_lexer(const char *input) {
   lexer *l = malloc(sizeof(lexer));
   if (l == 0) {
     puts("fail to alloc mem");

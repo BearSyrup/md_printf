@@ -7,7 +7,7 @@ typedef struct {
   char ch;
 } lexer;
 
-lexer *lexer_init(const char *input);
+lexer *new_lexer(const char *input);
 void lexer_end(lexer *lexer);
 lexer *tokenize(char *input);
 void read_char(lexer *lexer);

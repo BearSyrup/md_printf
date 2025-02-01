@@ -24,9 +24,14 @@ token *next_token(lexer *lexer) {
     tk->token_type = EOF_TOK;
     break;
   case '%':
+
+    /* TODO: start token here -> every letter has to be read diferently from now
+     * on */
     strcpy(tk->literal, read_tok(lexer));
     tk->token_type = lookup_identifier(tk->literal);
     break;
+  case 'd':
+
   default:
     strcpy(tk->literal, read_identifier(lexer));
     tk->token_type = WORD;
@@ -52,13 +57,19 @@ char *read_tok(lexer *lexer) {
   char *identifier;
 
   position = lexer->position;
-  while (is_arg_type(lexer->ch)) {
+  while (is_specifier(lexer->ch)) {
     read_char(lexer);
   }
   memcpy(identifier, &lexer->input[position], lexer->position - position);
   return identifier;
 }
-int is_arg_type(char ch) { return (ch == 'd' || ch == '%'); }
+int is_specifier(char ch) {
+  char *ch_pos;
+  char *specifiers = "dxXip%";
+  ch_pos = strchr(specifiers, ch);
+  return ch_pos != NULL;
+}
+
 int is_letter(char ch) {
   return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z');
 }

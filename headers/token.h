@@ -22,7 +22,7 @@ typedef struct {
 } token;
 token *next_token(lexer *lexer);
 int is_letter(char ch);
-int is_arg_type(char ch);
+int is_specifier(char ch);
 t_token lookup_identifier(char *identifier);
 char *read_tok(lexer *lexer);
 char *read_identifier(lexer *lexer);

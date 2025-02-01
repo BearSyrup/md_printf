@@ -15,7 +15,7 @@ int mk_printf(const char *str, ...) {
   va_list args;
   va_start(args, str);
 
-  ptrlexer = lexer_init(str);
+  ptrlexer = new_lexer(str);
   token_name = next_token(ptrlexer);
   if (token_name->token_type == INT) {
     printf("we got the token and the value is: %d", va_arg(args, int));
@@ -30,7 +30,7 @@ int main(void) {
   char test_token[10] = "%d this is";
   token *tk_test;
 
-  ptrlexer = lexer_init(test_token);
+  ptrlexer = new_lexer(test_token);
   tk_test = next_token(ptrlexer);
 
   putchar(ptrlexer->ch);
