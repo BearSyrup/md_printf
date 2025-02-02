@@ -9,6 +9,5 @@ typedef struct {
 
 lexer *new_lexer(const char *input);
 void lexer_end(lexer *lexer);
-lexer *tokenize(char *input);
 void read_char(lexer *lexer);
 #endif // !LEXER_H

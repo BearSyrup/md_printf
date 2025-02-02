@@ -5,19 +5,25 @@
 #include <string.h>
 #define EXIT_SUCCESS 0
 
-int mk_printf(const char *str, ...);
+int md_printf(const char *str, ...);
 
-int mk_printf(const char *str, ...) {
+/* TODO: loop through lexer get all tokens and print them? */
+int md_printf(const char *str, ...) {
   lexer *ptrlexer;
   token *token_name;
   int str_size = strlen(str);
-
+  token *current_tkn;
+  token **tokens;
   va_list args;
+
   va_start(args, str);
 
   ptrlexer = new_lexer(str);
+  while (current_tkn->token_type != EOF_TOK) {
+    current_tkn = next_token(ptrlexer);
+  }
   token_name = next_token(ptrlexer);
-  if (token_name->token_type == INT) {
+  if (token_name->token_type == INT_SPECIFIER) {
     printf("we got the token and the value is: %d", va_arg(args, int));
   }
   va_end(args);
@@ -38,6 +44,6 @@ int main(void) {
 
   printf("starting test\n");
 
-  mk_printf("%d", 2);
+  md_printf("%d", 2);
   return EXIT_SUCCESS;
 }

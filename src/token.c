@@ -24,23 +24,23 @@ token *next_token(lexer *lexer) {
     tk->token_type = EOF_TOK;
     break;
   case '%':
-
-    /* TODO: start token here -> every letter has to be read diferently from now
-     * on */
-    strcpy(tk->literal, read_tok(lexer));
-    tk->token_type = lookup_identifier(tk->literal);
+    strcpy(tk->literal, "%");
+    tk->token_type = START_SPECIFIER;
     break;
-  case 'd':
-
   default:
-    strcpy(tk->literal, read_identifier(lexer));
+    if (is_specifier(lexer)) {
+      memcpy(tk->literal, &lexer->ch, 1);
+      tk->token_type = t_token_from_specifier(lexer->ch);
+      break;
+    }
+    strcpy(tk->literal, read_word(lexer));
     tk->token_type = WORD;
     break;
   }
   return tk;
 }
 
-char *read_identifier(lexer *lexer) {
+char *read_word(lexer *lexer) {
   int position;
   char *identifier;
 
@@ -52,21 +52,24 @@ char *read_identifier(lexer *lexer) {
   memcpy(identifier, &lexer->input[position], lexer->read_pos - position);
   return identifier;
 }
-char *read_tok(lexer *lexer) {
+char *read_specifier(lexer *lexer) {
   int position;
-  char *identifier;
+  char *specifier;
 
   position = lexer->position;
-  while (is_specifier(lexer->ch)) {
+  while (is_specifier(lexer)) {
     read_char(lexer);
   }
-  memcpy(identifier, &lexer->input[position], lexer->position - position);
-  return identifier;
+  memcpy(specifier, &lexer->input[position], lexer->position - position);
+  return specifier;
 }
-int is_specifier(char ch) {
+int is_specifier(lexer *lexer) {
   char *ch_pos;
   char *specifiers = "dxXip%";
-  ch_pos = strchr(specifiers, ch);
+
+  if (lexer->input[lexer->position] == '%') {
+    ch_pos = strchr(specifiers, lexer->ch);
+  }
   return ch_pos != NULL;
 }
 
@@ -74,9 +77,52 @@ int is_letter(char ch) {
   return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z');
 }
 
-t_token lookup_identifier(char *identifier) {
-  if (strcmp(identifier, "%d")) {
-    return INT;
+t_token t_token_from_specifier(char specifier) {
+  switch (specifier) {
+  case 'd':
+    return INT_SPECIFIER;
+  case 'i':
+    return INT_SPECIFIER;
+  case 'p':
+    return POINTER_SPECIFIER;
+  case 'x':
+    return HEXA_SPECIFIER;
+  case 'X':
+    return HEXA_SPECIFIER;
+  default:
+    return ILLEGAL_SPECIFIER;
   }
-  return ILLEGAL;
+}
+
+void new_list_token(list_token *tokens, size_t inicial_size) {
+  size_t size = sizeof(token) * inicial_size;
+  size_t list_size = sizeof(list_token);
+
+  tokens = malloc(list_size);
+  if (tokens == NULL) {
+    printf("fail to alloc mem");
+    exit(1);
+  }
+  tokens->tokens = malloc(size);
+  if (tokens->tokens == NULL) {
+    printf("fail to alloc mem");
+    exit(1);
+  }
+  tokens->used = 0;
+  tokens->size = inicial_size;
+}
+void add_token(list_token *tokens, token *tkn) {
+  size_t token_size;
+  size_t increase_factor;
+
+  increase_factor = 3;
+
+  if (tkn != NULL) {
+    token_size = sizeof(*tkn);
+    if (tokens->used >= tokens->size) {
+      tokens->size *= increase_factor;
+      tokens->tokens = realloc(tokens->tokens, token_size * (tokens->size));
+    }
+    tokens->tokens[tokens->used++] = tkn;
+  }
 }
