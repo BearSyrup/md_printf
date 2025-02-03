@@ -7,43 +7,39 @@
 
 int md_printf(const char *str, ...);
 
-/* TODO: loop through lexer get all tokens and print them? */
 int md_printf(const char *str, ...) {
   lexer *ptrlexer;
   token *token_name;
   int str_size = strlen(str);
   token *current_tkn;
-  token **tokens;
+  size_t inicial_size = 5;
+  list_token tokens;
   va_list args;
+  int i;
 
+  /*init objects */
   va_start(args, str);
-
   ptrlexer = new_lexer(str);
+  new_list_token(&tokens, inicial_size);
+  current_tkn = next_token(ptrlexer);
+  /* TODO: save eof token */
   while (current_tkn->token_type != EOF_TOK) {
+    add_token(&tokens, current_tkn);
     current_tkn = next_token(ptrlexer);
   }
-  token_name = next_token(ptrlexer);
-  if (token_name->token_type == INT_SPECIFIER) {
-    printf("we got the token and the value is: %d", va_arg(args, int));
+  printf("those are the literals:\n");
+  for (i = 0; i < 7; i++) {
+    printf(" %s:%s, ", tokens.tokens[i]->literal,
+           get_token_name(tokens.tokens[i]->token_type));
   }
+  printf("\n%s", ptrlexer->input);
   va_end(args);
   lexer_end(ptrlexer);
+  tkn_list_end(&tokens);
   return str_size;
 }
 
 int main(void) {
-  lexer *ptrlexer;
-  char test_token[10] = "%d this is";
-  token *tk_test;
-
-  ptrlexer = new_lexer(test_token);
-  tk_test = next_token(ptrlexer);
-
-  putchar(ptrlexer->ch);
-  putchar('\n');
-
-  printf("starting test\n");
-
-  md_printf("%d", 2);
+  md_printf("this %d is a crazy ideia");
   return EXIT_SUCCESS;
 }

@@ -28,14 +28,15 @@ typedef struct {
   size_t used;
   size_t size;
 } list_token;
-
+const char *get_token_name(t_token token);
 token *next_token(lexer *lexer);
 int is_letter(char ch);
 int is_specifier(lexer *lexer);
 t_token t_token_from_specifier(char specifier);
 char *read_specifier(lexer *lexer);
 char *read_word(lexer *lexer);
-void new_list_token(list_token *tkn_list, size_t size_token);
-void save_token(token **arr_token, token *tkn);
+void new_list_token(list_token *tkn_list, size_t inicial_size);
+void tkn_list_end(list_token *);
+void add_token(list_token *tokens, token *tkn);
 
 #endif

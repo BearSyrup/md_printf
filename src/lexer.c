@@ -15,18 +15,24 @@ void read_char(lexer *lexer) {
 }
 
 lexer *new_lexer(const char *input) {
-  lexer *l = malloc(sizeof(lexer));
+  lexer *l;
+  size_t input_size;
+
+  l = malloc(sizeof(lexer));
   if (l == 0) {
     puts("fail to alloc mem");
     exit(1);
   }
 
-  l->input = malloc(strlen(input));
+  input_size = strlen(input);
+  l->input = malloc(input_size + 1);
   if (l->input == NULL) {
     puts("fail to alloc mem");
     exit(1);
   }
   strcpy(l->input, input);
+  l->input[input_size + 1] = '\0';
+
   l->position = 0;
   l->read_pos = 0;
   l->ch = 0;
