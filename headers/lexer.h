@@ -1,6 +1,10 @@
 #ifndef LEXER_H
 #define LEXER_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 typedef struct {
+  int started_specifier;
   char *input;
   int position;
   int read_pos;

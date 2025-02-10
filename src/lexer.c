@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "../headers/lexer.h"
 
 void read_char(lexer *lexer) {
@@ -33,6 +29,7 @@ lexer *new_lexer(const char *input) {
   strcpy(l->input, input);
   l->input[input_size + 1] = '\0';
 
+  l->started_specifier = 0;
   l->position = 0;
   l->read_pos = 0;
   l->ch = 0;
