@@ -14,6 +14,9 @@ int md_printf(const char *str, ...) {
 
   ptrlexer = new_lexer(str);
   tokens = get_tokens(ptrlexer);
+  for (int n = 0; n < tokens->used; n++) {
+    printf("token[%d] => %s\n", n, tokens->tokens[n]->literal);
+  }
   evaluate(tokens, args);
 
   // Dealocate
@@ -24,9 +27,6 @@ int md_printf(const char *str, ...) {
 }
 
 int main(void) {
-  char *test = "test";
-  void *ptr_test = test;
-
-  md_printf("this is a %p", ptr_test);
+  md_printf("this is the new test %010d", 23);
   return EXIT_SUCCESS;
 }

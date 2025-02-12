@@ -1,5 +1,7 @@
 #include "../headers/lexer.h"
 
+char peek(const lexer *l) { return l->input[l->position]; }
+
 void read_char(lexer *lexer) {
   if (lexer->read_pos >= strlen(lexer->input)) {
     lexer->ch = 0;
@@ -8,6 +10,35 @@ void read_char(lexer *lexer) {
   }
   lexer->position = lexer->read_pos;
   lexer->read_pos += 1;
+}
+
+char *read_word(lexer *lexer) {
+  int start_pos;
+  char *identifier;
+  int word_size;
+
+  start_pos = lexer->position;
+  while (is_alpha(lexer->ch)) {
+    read_char(lexer);
+  }
+  word_size = lexer->position - start_pos;
+  identifier = malloc(sizeof(char) * (word_size + 1));
+  memcpy(identifier, &lexer->input[start_pos], word_size);
+
+  return identifier;
+}
+
+char *read_specifier(lexer *lexer) {
+  int start_pos;
+  char *specifier;
+
+  start_pos = lexer->position;
+  while (is_special_char(lexer->ch) && lexer->ch) {
+    read_char(lexer);
+  }
+  specifier = malloc(sizeof(char) * ((lexer->position - start_pos) + 1));
+  memcpy(specifier, &lexer->input[start_pos], lexer->position - start_pos);
+  return specifier;
 }
 
 lexer *new_lexer(const char *input) {
@@ -29,7 +60,6 @@ lexer *new_lexer(const char *input) {
   strcpy(l->input, input);
   l->input[input_size + 1] = '\0';
 
-  l->started_specifier = 0;
   l->position = 0;
   l->read_pos = 0;
   l->ch = 0;

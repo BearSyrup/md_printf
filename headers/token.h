@@ -1,6 +1,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 #include "lexer.h"
+#include "mikastd.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +9,9 @@
 
 typedef enum {
   START_SPECIFIER,
+  LENGTH,
+  PRECISION,
+  WIDTH,
   INT_SPECIFIER,
   LEFT_JUSTIFY_FLAG,
   FORCE_SIGN_FLAG,
@@ -34,16 +38,17 @@ typedef struct {
   size_t used;
   size_t size;
 } list_token;
+
 const char *get_token_name(t_token token);
 token *next_token(lexer *lexer);
-int is_letter(char ch);
-int is_specifier(char ch);
-t_token t_token_from_specifier(char specifier);
-char *read_specifier(lexer *lexer);
-char *read_word(lexer *lexer);
+list_token *get_tokens(lexer *lexer);
+t_token t_token_from_literal(char literal);
 void new_list_token(list_token *tkn_list, size_t inicial_size);
 void tkn_list_end(list_token *);
 void add_token(list_token *tokens, token *tkn);
-list_token *get_tokens(lexer *lexer);
-int is_flag(char ch_identifier);
+token *get_width_token(char *token_literal, int begin_str, int end_str);
+token *get_precision_token(char ch_precision);
+token *get_length_token(char ch_length);
+token *get_flag_token(char ch_flag);
+token *get_specifier_token(char ch_specifier);
 #endif
