@@ -1,7 +1,7 @@
 #include "../headers/token.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 token *next_token(lexer *lexer) {
   token *tk;
@@ -23,20 +23,11 @@ token *next_token(lexer *lexer) {
     tk->literal = 0;
     tk->token_type = EOF_TOK;
     break;
-  case ' ':
-    strcpy(tk->literal, " ");
-    tk->token_type = WORD;
-    break;
   case '%':
-    strcpy(tk->literal, "%");
+    strcpy(tk->literal, strcat(read_specifier(lexer), "\0"));
     tk->token_type = START_SPECIFIER;
     break;
   default:
-    if (is_specifier(lexer)) {
-      memcpy(tk->literal, &lexer->ch, 1);
-      tk->token_type = t_token_from_specifier(lexer->ch);
-      break;
-    }
     strcpy(tk->literal, strcat(read_word(lexer), "\0"));
     tk->token_type = WORD;
     break;
@@ -44,53 +35,8 @@ token *next_token(lexer *lexer) {
   return tk;
 }
 
-char *read_word(lexer *lexer) {
-  int start_pos;
-  char *identifier;
-
-  start_pos = lexer->position;
-  while (is_letter(lexer->ch)) {
-    printf("this is the character: %c at position %d \n", lexer->ch,
-           lexer->position);
-    read_char(lexer);
-  }
-  memcpy(identifier, &lexer->input[start_pos], lexer->position - start_pos);
-  printf("\nthis is the inicial value: %d\nthis is the position: %d\nthis "
-         "is the identifier: %s\n",
-         start_pos, lexer->position, identifier);
-  return identifier;
-}
-
-char *read_specifier(lexer *lexer) {
-  int start_pos;
-  char *specifier;
-
-  start_pos = lexer->position;
-  while (is_specifier(lexer)) {
-    read_char(lexer);
-  }
-  memcpy(specifier, &lexer->input[start_pos], lexer->position - start_pos);
-  return specifier;
-}
-int is_specifier(lexer *lexer) {
-  char *ch_pos;
-  char *specifiers = "dxXip%";
-  int prev_pos;
-
-  prev_pos = lexer->position - 1;
-  if (lexer->input[prev_pos] == '%') {
-    ch_pos = strchr(specifiers, lexer->ch);
-    return ch_pos != NULL;
-  }
-  return 0;
-}
-
-int is_letter(char ch) {
-  return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') && (ch != ' ');
-}
-
-t_token t_token_from_specifier(char specifier) {
-  switch (specifier) {
+t_token t_token_from_literal(char literal) {
+  switch (literal) {
   case 'd':
     return INT_SPECIFIER;
   case 'i':
@@ -101,6 +47,22 @@ t_token t_token_from_specifier(char specifier) {
     return HEXA_SPECIFIER;
   case 'X':
     return HEXA_SPECIFIER;
+  case 'c':
+    return CHAR_SPECIFIER;
+  case 's':
+    return STRING_SPECIFIER;
+  case '%':
+    return PERCENT_SPECIFIER;
+  case '#':
+    return ALTERNATE_FORM;
+  case '-':
+    return LEFT_JUSTIFY_FLAG;
+  case '+':
+    return FORCE_SIGN_FLAG;
+  case 32:
+    return SPACE_FLAG;
+  case '0':
+    return ZERO_PADDING;
   default:
     return ILLEGAL_SPECIFIER;
   }
@@ -112,7 +74,7 @@ void new_list_token(list_token *tkn_list, size_t inicial_size) {
 
   tkn_list->tokens = malloc(size);
   if (tkn_list->tokens == NULL) {
-    printf("fail to alloc mem");
+    puts("fail to alloc mem");
     exit(1);
   }
   tkn_list->used = 0;
@@ -167,4 +129,101 @@ const char *get_token_name(t_token token) {
   default:
     return "not found";
   };
+}
+void get_tokens_from_specifier(list_token *tokens, char *token_literal) {
+  int i, begin, end;
+  token *token;
+
+  i = 1; /* jump % START_SPECIFIER */
+  while (token_literal[i] != '\0') {
+    /* flag width precision length specifier */
+    if (is_flag(token_literal[i])) {
+      token = get_flag_token(token_literal[i]);
+      add_token(tokens, get_flag_token(token_literal[i]));
+    } else if (mk_is_number(token_literal[i])) {
+      begin = end = i;
+      while (mk_is_number(token_literal[end])) {
+        end++;
+      }
+      i += (end - begin) - 1;
+      add_token(tokens, get_width_token(token_literal, begin, end));
+    } else if (is_specifier(token_literal[i])) {
+      add_token(tokens, get_specifier_token(token_literal[i]));
+    }
+    i++;
+  }
+}
+
+token *get_length_token(char ch_length) {
+  token *token;
+  char s[2] = "";
+  token->literal = malloc(sizeof(char) * 2);
+  add_char(s, ch_length);
+  memcpy(token->literal, s, sizeof(char));
+  token->token_type = LENGTH;
+  return token;
+}
+
+token *get_specifier_token(char ch_specifier) {
+  token *ptrtoken;
+  ptrtoken = malloc(sizeof(token));
+  char s[2] = "";
+  ptrtoken->literal = malloc(sizeof(char) * 2);
+  add_char(s, ch_specifier);
+  memcpy(ptrtoken->literal, s, sizeof(char));
+  ptrtoken->token_type = t_token_from_literal(ch_specifier);
+  return ptrtoken;
+}
+
+token *get_precision_token(char ch_precision) {
+  token *ptrtoken;
+  ptrtoken = malloc(sizeof(token));
+  char s[2] = "";
+  ptrtoken->literal = malloc(sizeof(char) * 2);
+  add_char(s, ch_precision);
+  memcpy(ptrtoken->literal, s, sizeof(char));
+  ptrtoken->token_type = PRECISION;
+  return ptrtoken;
+}
+
+token *get_flag_token(char ch_flag) {
+  token *ptrtoken;
+  ptrtoken = malloc(sizeof(token));
+  ptrtoken->literal = malloc(sizeof(char) * 2);
+  char s[2] = "";
+  add_char(s, ch_flag);
+  memcpy(ptrtoken->literal, s, sizeof(char));
+  ptrtoken->token_type = t_token_from_literal(ch_flag);
+  return ptrtoken;
+}
+
+token *get_width_token(char *token_literal, int begin_str, int end_str) {
+  token *ptrtoken;
+  ptrtoken = malloc(sizeof(token));
+  ptrtoken->literal = malloc((end_str - begin_str) * sizeof(char));
+  memcpy(ptrtoken->literal, &token_literal[begin_str], end_str - begin_str);
+  ptrtoken->token_type = WIDTH;
+  return ptrtoken;
+}
+
+list_token *get_tokens(lexer *lexer) {
+  size_t inicial_list_size = 5;
+  list_token *tokens;
+  token *current_tkn;
+
+  tokens = malloc(sizeof(list_token));
+  new_list_token(tokens, inicial_list_size);
+
+  current_tkn = next_token(lexer);
+  while (current_tkn->token_type != EOF_TOK) {
+    if (current_tkn->token_type == START_SPECIFIER) {
+      get_tokens_from_specifier(tokens, current_tkn->literal);
+      current_tkn = next_token(lexer);
+      continue;
+    }
+    add_token(tokens, current_tkn);
+    current_tkn = next_token(lexer);
+  }
+
+  return tokens;
 }
