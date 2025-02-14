@@ -19,4 +19,4 @@ Custom parsing logic: No dependencies, just pure C.
 
 What's Next?
 This is for me, right? And now I'm just talking to myself. I never thought I would fall in love with code again. The state of this project is a mess (at the moment), 
-but crossing thought this gave me so much confidence. Remember: mini-shell, text editor, gameboy image processor emulator.
+but crossing throughout this gave me so much confidence. Remember: mini-shell, text editor, gameboy image processor emulator.
