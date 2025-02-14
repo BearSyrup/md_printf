@@ -7,7 +7,7 @@
 int is_flag(char ch_identifier);
 int mk_is_number(char ch);
 int is_special_char(char ch);
-char *itoa(int value, char *string, int radix);
+char *itoa(int value, char *string, int radix, int force_sing);
 void add_char(char *s, char c);
 int is_alpha(char ch);
 int is_specifier(char ch);

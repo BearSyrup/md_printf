@@ -85,10 +85,9 @@ void mk_puts(char *s) {
   write(1, &space, 1);
 }
 
-char *itoa(int value, char *string, int radix) {
+char *itoa(int value, char *string, int radix, int force_sign) {
   int is_negative;
   int remainder;
-  char asc_character;
   int i;
 
   if (value == 0) {
@@ -101,12 +100,16 @@ char *itoa(int value, char *string, int radix) {
   is_negative = 0;
   if (value < 0) {
     is_negative = 1;
+    value = value * -1;
   }
   i = 0;
   while (value) {
     remainder = value % radix;
     string[i++] = (remainder > 9) ? (remainder - 10) + 'a' : remainder + '0';
     value /= radix;
+  }
+  if (force_sign && !is_negative) {
+    string[i++] = '+';
   }
   if (is_negative) {
     string[i++] = '-';

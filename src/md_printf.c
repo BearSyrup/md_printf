@@ -2,12 +2,9 @@
 
 int md_printf(const char *str, ...) {
   lexer *ptrlexer;
-  token *token_name;
   int str_size = strlen(str);
-  size_t inicial_size = 5;
   list_token *tokens;
   va_list args;
-  int i;
 
   /*init objects */
   va_start(args, str);
@@ -27,6 +24,6 @@ int md_printf(const char *str, ...) {
 }
 
 int main(void) {
-  md_printf("this is the new test %010d", 23);
+  md_printf("this is the new test %d", -23);
   return EXIT_SUCCESS;
 }

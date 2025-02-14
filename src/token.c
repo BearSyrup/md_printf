@@ -23,6 +23,8 @@ token *next_token(lexer *lexer) {
     tk->literal = 0;
     tk->token_type = EOF_TOK;
     break;
+  /* FIXME: this need to change -> you need to compute spaces | ideia: maybe
+   * when find a specifier finish read_specifier */
   case '%':
     strcpy(tk->literal, strcat(read_specifier(lexer), "\0"));
     tk->token_type = START_SPECIFIER;
@@ -104,32 +106,7 @@ void tkn_list_end(list_token *tokens) {
     tokens->size = tokens->used = 0;
   }
 }
-const char *get_token_name(t_token token) {
-  switch (token) {
-  case START_SPECIFIER:
-    return "START";
-  case INT_SPECIFIER:
-    return "INT";
-  case CHAR_SPECIFIER:
-    return "CHAR";
-  case HEXA_SPECIFIER:
-    return "HEXA";
-  case POINTER_SPECIFIER:
-    return "POINTER";
-  case STRING_SPECIFIER:
-    return "STRING";
-  case PERCENT_SPECIFIER:
-    return "PERCENT";
-  case ILLEGAL_SPECIFIER:
-    return "ILLEGAL";
-  case EOF_TOK:
-    return "EOF";
-  case WORD:
-    return "WORD";
-  default:
-    return "not found";
-  };
-}
+
 void get_tokens_from_specifier(list_token *tokens, char *token_literal) {
   int i, begin, end;
   token *token;
@@ -172,6 +149,16 @@ token *get_specifier_token(char ch_specifier) {
   add_char(s, ch_specifier);
   memcpy(ptrtoken->literal, s, sizeof(char));
   ptrtoken->token_type = t_token_from_literal(ch_specifier);
+  return ptrtoken;
+}
+
+token *get_finish_specifier_token() {
+  token *ptrtoken;
+  ptrtoken = malloc(sizeof(token));
+  char s[2] = "";
+  ptrtoken->literal = malloc(sizeof(char) * 2);
+  memcpy(ptrtoken->literal, s, sizeof(char));
+  ptrtoken->token_type = FINISH_SPECIFIER;
   return ptrtoken;
 }
 
